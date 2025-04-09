@@ -1,16 +1,22 @@
-# flutter_tp01
+# 🧮 Base Calculator
 
-A new Flutter project.
+Uma aplicação Flutter simples para converter números entre diferentes sistemas numéricos: **Binário, Octal, Decimal e Hexadecimal**.
 
-## Getting Started
+## ✨ Funcionalidades
 
-This project is a starting point for a Flutter application.
+- Seleção da base de entrada (Bin, Oct, Dec, Hex)
+- Conversão instantânea para as restantes bases
+- Validação automática do input
+- Teclado numérico adaptado à base escolhida
+- Design simples, com destaque visual para a base ativa
 
-A few resources to get you started if this is your first Flutter project:
+## 🧑‍💻 Requisitos
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter 3.x ou superior
+- SDK do Android / Emulador / Dispositivo físico
+- Compatível com Android, iOS, Web e Desktop
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📄 Licença
+
+Este projeto é open-source. Podes modificá-lo e distribuí-lo à vontade 🚀
+
