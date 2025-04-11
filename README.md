@@ -1,22 +1,62 @@
-# 🧮 Base Calculator
+# 📟 Base Calculator
 
-Uma aplicação Flutter simples para converter números entre diferentes sistemas numéricos: **Binário, Octal, Decimal e Hexadecimal**.
+A **Base Calculator** é uma aplicação Flutter que permite converter números entre diferentes bases numéricas (Binário, Octal, Decimal e Hexadecimal), bem como realizar operações aritméticas básicas (adição, subtração, multiplicação e divisão) nessas bases.
 
 ## ✨ Funcionalidades
 
-- Seleção da base de entrada (Bin, Oct, Dec, Hex)
-- Conversão instantânea para as restantes bases
-- Validação automática do input
-- Teclado numérico adaptado à base escolhida
-- Design simples, com destaque visual para a base ativa
+* Conversão instantânea entre:
+    * Binário (base 2)
+    * Octal (base 8)
+    * Decimal (base 10)
+    * Hexadecimal (base 16)
 
-## 🧑‍💻 Requisitos
+![Conversions Demo](assets/conversionsGIF.gif)
 
-- Flutter 3.x ou superior
-- SDK do Android / Emulador / Dispositivo físico
-- Compatível com Android, iOS, Web e Desktop
+* Interface intuitiva para introdução de números e operações
+* Validação automática dos dados introduzidos com base na base selecionada
 
-## 📄 Licença
+![Numpad Validation](assets/numpadValidationGIF.gif)
 
-Este projeto é open-source. Podes modificá-lo e distribuí-lo à vontade 🚀
+* Operações disponíveis: `+`, `-`, `X`, `÷`
 
+![Arithmetic Operations](assets/arithmeticGIF.gif)
+
+* Suporte visual para diferentes bases com destaques dinâmicos
+* Mensagens de erro amigáveis (ex: divisão por zero, dados inválidos)
+
+![Zero Division](assets/zeroDivision.png)
+
+## 🚀 Como correr a aplicação
+
+1. Certifica-te de que tens o [Flutter](https://flutter.dev/docs/get-started/install) instalado.
+2. Clona este repositório:
+
+``` bash
+git clone https://github.com/RikiMouraPT/flutter-tp01.git
+```
+
+3. Navega até à pasta do projeto:
+
+``` bash
+cd flutter-tp01
+```
+
+4. Corre a aplicação:
+
+``` bash
+flutter run
+```
+
+## 🛠️ Estrutura principal
+
+* `main.dart`: Contém toda a lógica e interface da aplicação.
+* `fromController`: Controlador de texto que guarda a entrada do utilizador.
+* `calculate()`: Converte o número inserido nas diferentes bases.
+* `operationPressed()`, `evaluate()`: Funções responsáveis pelas operações aritméticas.
+
+## 📂 To-do (futuro)
+
+* Suporte para números negativos
+* Histórico de operações
+* Animações e transições mais suaves
+* Temas personalizados

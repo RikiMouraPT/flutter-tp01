@@ -27,6 +27,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
+  
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
@@ -55,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void addInput(String input) {
+  void buttonPressed(String input) {
     fromController.text += input;
     calculate(fromBase, toBase);
   }
@@ -71,6 +72,64 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
+
+  bool waitingForSecondOperand = false;
+  String selectedOperation = "";
+  int firstOperand = 0;
+  
+  void operationPressed(String op) {
+    if (formkey.currentState!.validate()) {
+      setState(() {
+        selectedOperation = op;
+        firstOperand = int.parse(fromController.text, radix: fromBase);
+        fromController.clear();
+        waitingForSecondOperand = true;
+      });
+    }
+  }
+
+  void evaluate() {
+    if (formkey.currentState!.validate() && selectedOperation != "" && waitingForSecondOperand) {
+      int secondOperand = int.parse(fromController.text, radix: fromBase);
+      int result = 0;
+
+      switch (selectedOperation) {
+        case '+':
+          result = firstOperand + secondOperand;
+          break;
+        case '-':
+          result = firstOperand - secondOperand;
+          break;
+        case 'X':
+          result = firstOperand * secondOperand;
+          break;
+        case '÷':
+          if (secondOperand != 0) {
+            result = firstOperand ~/ secondOperand;
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Erro: Divisão por zero"),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.red,
+              )
+            );
+            return;
+          }
+          break;
+      }
+
+      fromController.text = result.toRadixString(fromBase).toUpperCase();
+      calculate(fromBase, toBase);
+
+      setState(() {
+        selectedOperation = "";
+        firstOperand = 0;
+        waitingForSecondOperand = false;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -303,10 +362,36 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
+            SizedBox(height: 50,),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                TextButton(
+                  onPressed: fromBase == 16 ? () => buttonPressed("A") : null, 
+                  child: Text(
+                    "A",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("🚀🔥🔥🔥🔥🚀 VIVA AO HÉLDER 🚀🔥🔥🔥🔥🚀"),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                  child: Text(
+                    " ",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  ),
+                ),
                 TextButton(
                   onPressed: () => {
                     fromController.clear(),
@@ -316,200 +401,219 @@ class _MyHomePageState extends State<MyHomePage> {
                       decResutl = "0";
                       hexResult = "0";
                     })
-                    }, 
+                  }, 
                   child: Text(
-                    "C", 
+                    "CE", 
                     style: TextStyle(
-                      fontSize: 45
+                      fontSize: 35
                     )
                   )
                 ),
-                SizedBox(width: 15),
                 TextButton(
                   onPressed: () => fromController.text = fromController.text.substring(0, fromController.text.length - 1),
                   child: Text(
                     "⌫", 
                     style: TextStyle(
-                      fontSize: 45
+                      fontSize: 35
                     )
                   )
                 ),
-                SizedBox(width: 40,)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => addInput("7") : null, 
+                  onPressed: () => operationPressed("+"), 
                   child: Text(
-                    "7",
+                    "+",
                     style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 ? () => addInput("8") : null, 
-                  child: Text(
-                    "8",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  ),
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 ? () => addInput("9") : null, 
-                  child: Text(
-                    "9",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 ? () => addInput("F") : null,  
-                  child: Text(
-                    "F",
-                    style: TextStyle(
-                      fontSize: 45
+                      fontSize: 35
                     ),
                   )
                 ),
               ],
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => addInput("4") : null, 
-                  child: Text(
-                    "4",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => addInput("5") : null, 
-                  child: Text(
-                    "5",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  ),
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => addInput("6") : null, 
-                  child: Text(
-                    "6",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 ? () => addInput("E") : null,  
-                  child: Text(
-                    "E",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 || fromBase == 2 ? () => addInput("1") : null, 
-                  child: Text(
-                    "1",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => addInput("2") : null, 
-                  child: Text(
-                    "2",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  ),
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => addInput("3") : null, 
-                  child: Text(
-                    "3",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 ? () => addInput("D") : null,  
-                  child: Text(
-                    "D",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 || fromBase == 2 ? () => addInput("0") : null, 
-                  child: Text(
-                    "0",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  )
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 ? () => addInput("A") : null, 
-                  child: Text(
-                    "A",
-                    style: TextStyle(
-                      fontSize: 45
-                    ),
-                  ),
-                ),
-                SizedBox(width: 25),
-                TextButton(
-                  onPressed: fromBase == 16 ? () => addInput("B") : null,
+                  onPressed: fromBase == 16 ? () => buttonPressed("B") : null,
                   child: Text(
                     "B",
                     style: TextStyle(
-                      fontSize: 45
+                      fontSize: 35
                     ),
                   )
                 ),
-                SizedBox(width: 25),
                 TextButton(
-                  onPressed: fromBase == 16 ? () => addInput("C") : null, 
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("7") : null, 
+                  child: Text(
+                    "7",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 ? () => buttonPressed("8") : null, 
+                  child: Text(
+                    "8",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 ? () => buttonPressed("9") : null, 
+                  child: Text(
+                    "9",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: () => operationPressed("-"),
+                  child: Text(
+                    "-",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: fromBase == 16 ? () => buttonPressed("C") : null, 
                   child: Text(
                     "C",
                     style: TextStyle(
-                      fontSize: 45
+                      fontSize: 35
                     ),
                   )
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("4") : null, 
+                  child: Text(
+                    "4",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("5") : null, 
+                  child: Text(
+                    "5",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("6") : null, 
+                  child: Text(
+                    "6",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: () => operationPressed("X"), 
+                  child: Text(
+                    "X",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: fromBase == 16 ? () => buttonPressed("D") : null,  
+                  child: Text(
+                    "D",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 || fromBase == 2 ? () => buttonPressed("1") : null, 
+                  child: Text(
+                    "1",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("2") : null, 
+                  child: Text(
+                    "2",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("3") : null, 
+                  child: Text(
+                    "3",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+                TextButton(
+                  onPressed: () => operationPressed("÷"),
+                  child: Text(
+                    "÷",
+                    style: TextStyle(
+                      fontSize: 35
+                    ),
+                  )
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(width: 4,),
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: fromBase == 16 ? () => buttonPressed("E") : null,
+                    child: Text("E", style: TextStyle(fontSize: 35)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: fromBase == 16 ? () => buttonPressed("F") : null,
+                    child: Text("F", style: TextStyle(fontSize: 35)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: TextButton(
+                    onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 || fromBase == 2
+                        ? () => buttonPressed("0")
+                        : null,
+                    child: Text("0", style: TextStyle(fontSize: 35)),
+                  ),
+                ),
+                Expanded(
+                  flex: 2, // ocupa o espaço de dois botões
+                  child: TextButton(
+                    onPressed: () => evaluate(),
+                    child: Text(
+                      "=",
+                      style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
             ),
