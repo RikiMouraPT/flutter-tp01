@@ -23,7 +23,9 @@ A **Base Calculator** é uma aplicação Flutter que permite converter números 
 
 * Suporte visual para diferentes bases com destaques dinâmicos
 * Mensagens de erro amigáveis (ex: divisão por zero, dados inválidos)
+
 ![Zero Division](assets/zeroDivision.png)
+
 
 ## 🚀 Como correr a aplicação
 
