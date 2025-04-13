@@ -42,6 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String decResutl = "0";
   String hexResult = "0";
 
+  /// This function is called when the user presses a button to select the base.
   void fromButton(String base) {
     setState(() {
       if (base == "Bin") {
@@ -56,11 +57,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  /// This function is called when the user presses a button to enter a number.
   void buttonPressed(String input) {
     fromController.text += input;
     calculate(fromBase, toBase);
   }
 
+  /// This function is called to calculate the result based on the selected base.
   void calculate(int fromBase, int toBase) {
     if (formkey.currentState!.validate()) {
       var parsedInt = int.parse(fromController.text, radix: fromBase);
@@ -77,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String selectedOperation = "";
   int firstOperand = 0;
   
+  /// This function is called when the user presses an operation button.
   void operationPressed(String op) {
     if (formkey.currentState!.validate()) {
       setState(() {
@@ -88,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  /// This function is called to evaluate the result based on the selected operation.
   void evaluate() {
     if (formkey.currentState!.validate() && selectedOperation != "" && waitingForSecondOperand) {
       int secondOperand = int.parse(fromController.text, radix: fromBase);
