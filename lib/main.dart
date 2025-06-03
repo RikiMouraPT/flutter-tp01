@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await DatabaseHelper.instance.database;
+
   runApp(const MyApp());
 }
 
@@ -32,6 +37,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final dbHelper = DatabaseHelper.instance;
+
   final GlobalKey<FormState> formkey = GlobalKey<FormState>();
   final TextEditingController fromController = TextEditingController();
 
@@ -41,6 +48,28 @@ class _MyHomePageState extends State<MyHomePage> {
   String octResult = "0";
   String decResutl = "0";
   String hexResult = "0";
+
+  // Database Methods
+
+  void insertHistory(String firstOperand, String secondOperand, String operator, String result) async {
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnFirstOperand: firstOperand,
+      DatabaseHelper.columnSecondOperand: secondOperand,
+      DatabaseHelper.columnOperator: operator,
+      DatabaseHelper.columnResult: result,
+    };
+    await dbHelper.insert(row);
+  }
+
+  List<Map<String, dynamic>> rows = [];
+
+  void queryHistory() async {
+    final allRows = await dbHelper.queryAllRows();
+    setState(() {
+      rows = allRows;
+    });
+  }
+
 
   /// This function is called when the user presses a button to select the base.
   void fromButton(String base) {
@@ -382,16 +411,31 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("🚀🔥🔥🔥🔥🚀 VIVA AO HÉLDER 🚀🔥🔥🔥🔥🚀"),
-                        duration: Duration(seconds: 2),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                    showDialog(context: context, builder: (context) {
+                      return AlertDialog(
+                        title: Text("History"),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: rows.map((row) {
+                              return ListTile(
+                                title: Text("${row[DatabaseHelper.columnFirstOperand]} ${row[DatabaseHelper.columnOperator]} ${row[DatabaseHelper.columnSecondOperand]} = ${row[DatabaseHelper.columnResult]}"),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("Close"),
+                          ),
+                        ],
+                      );
+                    });
                   },
                   child: Text(
-                    " ",
+                    "H",
                     style: TextStyle(
                       fontSize: 35
                     ),
