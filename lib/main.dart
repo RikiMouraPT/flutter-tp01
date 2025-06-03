@@ -304,7 +304,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     key: ValueKey<int>(binButtonKey),
                     onPressed: () {
                       setState(() {
-                        binButtonKey++; // Força sempre uma nova animação
+                        binButtonKey++;
                         fromButton("Bin");
                       });
                     },
