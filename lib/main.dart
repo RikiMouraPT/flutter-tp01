@@ -25,14 +25,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({
-    super.key, 
-    required this.title
-  });
+  const MyHomePage({super.key, required this.title});
   final String title;
 
   @override
-  
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
@@ -49,9 +45,22 @@ class _MyHomePageState extends State<MyHomePage> {
   String decResutl = "0";
   String hexResult = "0";
 
-  // Database Methods
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the query history
+    queryHistory();
+  }
 
-  void insertHistory(String firstOperand, String secondOperand, String operator, String result) async {
+  // Database Methods
+  List<Map<String, dynamic>> rows = [];
+
+  void insertHistory(
+    String firstOperand,
+    String secondOperand,
+    String operator,
+    String result,
+  ) async {
     Map<String, dynamic> row = {
       DatabaseHelper.columnFirstOperand: firstOperand,
       DatabaseHelper.columnSecondOperand: secondOperand,
@@ -59,17 +68,15 @@ class _MyHomePageState extends State<MyHomePage> {
       DatabaseHelper.columnResult: result,
     };
     await dbHelper.insert(row);
+    queryHistory();
   }
 
-  List<Map<String, dynamic>> rows = [];
-
-  void queryHistory() async {
+  Future<void> queryHistory() async {
     final allRows = await dbHelper.queryAllRows();
     setState(() {
       rows = allRows;
     });
   }
-
 
   /// This function is called when the user presses a button to select the base.
   void fromButton(String base) {
@@ -108,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool waitingForSecondOperand = false;
   String selectedOperation = "";
   int firstOperand = 0;
-  
+
   /// This function is called when the user presses an operation button.
   void operationPressed(String op) {
     if (formkey.currentState!.validate()) {
@@ -123,7 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// This function is called to evaluate the result based on the selected operation.
   void evaluate() {
-    if (formkey.currentState!.validate() && selectedOperation != "" && waitingForSecondOperand) {
+    if (formkey.currentState!.validate() &&
+        selectedOperation != "" &&
+        waitingForSecondOperand) {
       int secondOperand = int.parse(fromController.text, radix: fromBase);
       int result = 0;
 
@@ -146,12 +155,25 @@ class _MyHomePageState extends State<MyHomePage> {
                 content: Text("Erro: Divisão por zero"),
                 duration: Duration(seconds: 2),
                 backgroundColor: Colors.red,
-              )
+              ),
             );
             return;
           }
           break;
       }
+      // Insert the operation into the history
+      String firstOperandStr =
+          firstOperand.toRadixString(fromBase).toUpperCase();
+      String secondOperandStr =
+          secondOperand.toRadixString(fromBase).toUpperCase();
+      String resultStr = result.toRadixString(fromBase).toUpperCase();
+
+      insertHistory(
+        firstOperandStr,
+        secondOperandStr,
+        selectedOperation,
+        resultStr,
+      );
 
       fromController.text = result.toRadixString(fromBase).toUpperCase();
       calculate(fromBase, toBase);
@@ -164,6 +186,74 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Widget buildListView() {
+    if (rows.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            SizedBox(height: 16),
+            Text(
+              'No data available',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.builder(
+      itemCount: rows.length,
+      itemBuilder: (context, index) {
+        final row = rows[index];
+        return Card(
+          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.lightGreen[100],
+              child: Text(
+                '${index + 1}',
+                style: TextStyle(
+                  color: Colors.green[800],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            title: Text(
+              "${row[DatabaseHelper.columnFirstOperand]} "
+              "${row[DatabaseHelper.columnOperator]} "
+              "${row[DatabaseHelper.columnSecondOperand]} = "
+              "${row[DatabaseHelper.columnResult]}",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.delete, color: Colors.red[400]),
+              onPressed: () async {
+                await dbHelper.delete(row[DatabaseHelper.columnId]);
+                queryHistory();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Registro eliminado"),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,101 +261,117 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.history),
+            onPressed: () {
+              queryHistory();
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("History"),
+                    content: SizedBox(
+                      width: double.maxFinite,
+                      height: 300,
+                      child: buildListView()
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 25,),
+            SizedBox(height: 25),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
                   onPressed: () => fromButton("Bin"),
                   style: TextButton.styleFrom(
-                    backgroundColor: fromBase == 2 ? Colors.lightGreen[100] : Colors.transparent,
+                    backgroundColor:
+                        fromBase == 2
+                            ? Colors.lightGreen[100]
+                            : Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
-                  child: Text(
-                    "Bin",
-                    style: TextStyle(
-                      fontSize: 25,
-                    ),
-                  ),
+                  child: Text("Bin", style: TextStyle(fontSize: 25)),
                 ),
                 TextButton(
                   onPressed: () => fromButton("Oct"),
                   style: TextButton.styleFrom(
-                    backgroundColor: fromBase == 8 ? Colors.lightGreen[100] : Colors.transparent,
+                    backgroundColor:
+                        fromBase == 8
+                            ? Colors.lightGreen[100]
+                            : Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
-                  child: Text(
-                    "Oct",
-                    style: TextStyle(
-                      fontSize: 25,
-                    ),
-                  ),
+                  child: Text("Oct", style: TextStyle(fontSize: 25)),
                 ),
                 TextButton(
                   onPressed: () => fromButton("Dec"),
                   style: TextButton.styleFrom(
-                    backgroundColor: fromBase == 10 ? Colors.lightGreen[100] : Colors.transparent,
+                    backgroundColor:
+                        fromBase == 10
+                            ? Colors.lightGreen[100]
+                            : Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
-                  child: Text(
-                    "Dec",
-                    style: TextStyle(
-                      fontSize: 25,
-                    ),
-                  ),
+                  child: Text("Dec", style: TextStyle(fontSize: 25)),
                 ),
                 TextButton(
                   onPressed: () => fromButton("Hex"),
                   style: TextButton.styleFrom(
-                    backgroundColor: fromBase == 16 ? Colors.lightGreen[100] : Colors.transparent,
+                    backgroundColor:
+                        fromBase == 16
+                            ? Colors.lightGreen[100]
+                            : Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
-                  child: Text(
-                    "Hex",
-                    style: TextStyle(
-                      fontSize: 25,
-                    ),
-                  ),
+                  child: Text("Hex", style: TextStyle(fontSize: 25)),
                 ),
               ],
             ),
             Form(
               key: formkey,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 50), 
+                padding: EdgeInsets.symmetric(horizontal: 50),
                 child: TextFormField(
                   enabled: false,
                   controller: fromController,
                   style: TextStyle(
-                          fontSize: 30,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold
-                        ),
+                    fontSize: 30,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                   decoration: InputDecoration(
                     label: Text("Number"),
                     suffix: Text(
-                      fromBase == 2 ? "bin" 
-                      : fromBase == 8 ? "oct" 
-                      : fromBase == 10 ? "dec" 
-                      : "hex"
+                      fromBase == 2
+                          ? "bin"
+                          : fromBase == 8
+                          ? "oct"
+                          : fromBase == 10
+                          ? "dec"
+                          : "hex",
                     ),
                   ),
                   validator: (value) {
@@ -276,16 +382,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     if (parsedInt == null) {
                       if (fromBase == 2) {
                         return "Enter valid binary values.";
-                      } else if (fromBase == 8){
+                      } else if (fromBase == 8) {
                         return "Enter valid octal values.";
-                      }
-                      else if (fromBase == 10) {
+                      } else if (fromBase == 10) {
                         return "Enter valid decimal values.";
-                      }
-                      else if (fromBase == 16) {
+                      } else if (fromBase == 16) {
                         return "Enter valid hexadecimal values.";
-                      }
-                      else {
+                      } else {
                         return "Enter valid values.";
                       }
                     }
@@ -298,7 +401,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            SizedBox(height: 20,),
+            SizedBox(height: 20),
             Container(
               padding: EdgeInsets.only(left: 25),
               alignment: Alignment.centerLeft,
@@ -310,21 +413,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "Bin", 
+                        "Bin",
                         style: TextStyle(
                           fontSize: 25,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold
-                        )
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(width: 10),
                       Text(
                         binResult,
                         style: TextStyle(
-                            fontSize: 25,
-                            color: Colors.green[900],
-                          )
-                        )
+                          fontSize: 25,
+                          color: Colors.green[900],
+                        ),
+                      ),
                     ],
                   ),
                   Row(
@@ -332,43 +435,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "Oct", 
+                        "Oct",
                         style: TextStyle(
                           fontSize: 25,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold
-                        )
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(width: 10),
                       Text(
-                        octResult, 
-                        style: TextStyle(
-                            fontSize: 25,
-                            color: Colors.green[900],
-                          )
-                        )
-                    ],
-                  ),	
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Dec", 
+                        octResult,
                         style: TextStyle(
                           fontSize: 25,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold
-                        )
+                          color: Colors.green[900],
+                        ),
                       ),
-                      SizedBox(width: 10),
-                      Text(
-                        decResutl, 
-                        style: TextStyle(
-                            fontSize: 25,
-                            color: Colors.green[900],
-                          )
-                        )
                     ],
                   ),
                   Row(
@@ -376,105 +457,85 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "Hex", 
+                        "Dec",
                         style: TextStyle(
                           fontSize: 25,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold
-                        )
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(width: 10),
                       Text(
-                        hexResult, 
+                        decResutl,
                         style: TextStyle(
-                            fontSize: 25,
-                            color: Colors.green[900],
-                          )
-                        )
+                          fontSize: 25,
+                          color: Colors.green[900],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Hex",
+                        style: TextStyle(
+                          fontSize: 25,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        hexResult,
+                        style: TextStyle(
+                          fontSize: 25,
+                          color: Colors.green[900],
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 50,),
+            SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                  onPressed: fromBase == 16 ? () => buttonPressed("A") : null, 
-                  child: Text(
-                    "A",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  ),
+                  onPressed: fromBase == 16 ? () => buttonPressed("A") : null,
+                  child: Text("A", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: () {
-                    showDialog(context: context, builder: (context) {
-                      return AlertDialog(
-                        title: Text("History"),
-                        content: SingleChildScrollView(
-                          child: ListBody(
-                            children: rows.map((row) {
-                              return ListTile(
-                                title: Text("${row[DatabaseHelper.columnFirstOperand]} ${row[DatabaseHelper.columnOperator]} ${row[DatabaseHelper.columnSecondOperand]} = ${row[DatabaseHelper.columnResult]}"),
-                              );
-                            }).toList(),
+                  onPressed: null,
+                  child: Text(" ", style: TextStyle(fontSize: 35)),
+                ),
+                TextButton(
+                  onPressed:
+                      () => {
+                        fromController.clear(),
+                        setState(() {
+                          binResult = "0";
+                          octResult = "0";
+                          decResutl = "0";
+                          hexResult = "0";
+                        }),
+                      },
+                  child: Text("CE", style: TextStyle(fontSize: 35)),
+                ),
+                TextButton(
+                  onPressed:
+                      () =>
+                          fromController.text = fromController.text.substring(
+                            0,
+                            fromController.text.length - 1,
                           ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("Close"),
-                          ),
-                        ],
-                      );
-                    });
-                  },
-                  child: Text(
-                    "H",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  ),
+                  child: Text("⌫", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: () => {
-                    fromController.clear(),
-                    setState(() {
-                      binResult = "0";
-                      octResult = "0";
-                      decResutl = "0";
-                      hexResult = "0";
-                    })
-                  }, 
-                  child: Text(
-                    "CE", 
-                    style: TextStyle(
-                      fontSize: 35
-                    )
-                  )
-                ),
-                TextButton(
-                  onPressed: () => fromController.text = fromController.text.substring(0, fromController.text.length - 1),
-                  child: Text(
-                    "⌫", 
-                    style: TextStyle(
-                      fontSize: 35
-                    )
-                  )
-                ),
-                TextButton(
-                  onPressed: () => operationPressed("+"), 
-                  child: Text(
-                    "+",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed: () => operationPressed("+"),
+                  child: Text("+", style: TextStyle(fontSize: 35)),
                 ),
               ],
             ),
@@ -483,48 +544,32 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 TextButton(
                   onPressed: fromBase == 16 ? () => buttonPressed("B") : null,
-                  child: Text(
-                    "B",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  child: Text("B", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("7") : null, 
-                  child: Text(
-                    "7",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed:
+                      fromBase == 16 || fromBase == 10 || fromBase == 8
+                          ? () => buttonPressed("7")
+                          : null,
+                  child: Text("7", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 ? () => buttonPressed("8") : null, 
-                  child: Text(
-                    "8",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  ),
+                  onPressed:
+                      fromBase == 16 || fromBase == 10
+                          ? () => buttonPressed("8")
+                          : null,
+                  child: Text("8", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 ? () => buttonPressed("9") : null, 
-                  child: Text(
-                    "9",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed:
+                      fromBase == 16 || fromBase == 10
+                          ? () => buttonPressed("9")
+                          : null,
+                  child: Text("9", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
                   onPressed: () => operationPressed("-"),
-                  child: Text(
-                    "-",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  child: Text("-", style: TextStyle(fontSize: 35)),
                 ),
               ],
             ),
@@ -532,49 +577,33 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                  onPressed: fromBase == 16 ? () => buttonPressed("C") : null, 
-                  child: Text(
-                    "C",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed: fromBase == 16 ? () => buttonPressed("C") : null,
+                  child: Text("C", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("4") : null, 
-                  child: Text(
-                    "4",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed:
+                      fromBase == 16 || fromBase == 10 || fromBase == 8
+                          ? () => buttonPressed("4")
+                          : null,
+                  child: Text("4", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("5") : null, 
-                  child: Text(
-                    "5",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  ),
+                  onPressed:
+                      fromBase == 16 || fromBase == 10 || fromBase == 8
+                          ? () => buttonPressed("5")
+                          : null,
+                  child: Text("5", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("6") : null, 
-                  child: Text(
-                    "6",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed:
+                      fromBase == 16 || fromBase == 10 || fromBase == 8
+                          ? () => buttonPressed("6")
+                          : null,
+                  child: Text("6", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: () => operationPressed("X"), 
-                  child: Text(
-                    "X",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  ),
+                  onPressed: () => operationPressed("X"),
+                  child: Text("X", style: TextStyle(fontSize: 35)),
                 ),
               ],
             ),
@@ -582,55 +611,42 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
-                  onPressed: fromBase == 16 ? () => buttonPressed("D") : null,  
-                  child: Text(
-                    "D",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed: fromBase == 16 ? () => buttonPressed("D") : null,
+                  child: Text("D", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 || fromBase == 2 ? () => buttonPressed("1") : null, 
-                  child: Text(
-                    "1",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed:
+                      fromBase == 16 ||
+                              fromBase == 10 ||
+                              fromBase == 8 ||
+                              fromBase == 2
+                          ? () => buttonPressed("1")
+                          : null,
+                  child: Text("1", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("2") : null, 
-                  child: Text(
-                    "2",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  ),
+                  onPressed:
+                      fromBase == 16 || fromBase == 10 || fromBase == 8
+                          ? () => buttonPressed("2")
+                          : null,
+                  child: Text("2", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
-                  onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 ? () => buttonPressed("3") : null, 
-                  child: Text(
-                    "3",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  onPressed:
+                      fromBase == 16 || fromBase == 10 || fromBase == 8
+                          ? () => buttonPressed("3")
+                          : null,
+                  child: Text("3", style: TextStyle(fontSize: 35)),
                 ),
                 TextButton(
                   onPressed: () => operationPressed("÷"),
-                  child: Text(
-                    "÷",
-                    style: TextStyle(
-                      fontSize: 35
-                    ),
-                  )
+                  child: Text("÷", style: TextStyle(fontSize: 35)),
                 ),
               ],
             ),
             Row(
               children: [
-                SizedBox(width: 4,),
+                SizedBox(width: 4),
                 Expanded(
                   flex: 1,
                   child: TextButton(
@@ -648,9 +664,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 Expanded(
                   flex: 1,
                   child: TextButton(
-                    onPressed: fromBase == 16 || fromBase == 10 || fromBase == 8 || fromBase == 2
-                        ? () => buttonPressed("0")
-                        : null,
+                    onPressed:
+                        fromBase == 16 ||
+                                fromBase == 10 ||
+                                fromBase == 8 ||
+                                fromBase == 2
+                            ? () => buttonPressed("0")
+                            : null,
                     child: Text("0", style: TextStyle(fontSize: 35)),
                   ),
                 ),
@@ -660,7 +680,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () => evaluate(),
                     child: Text(
                       "=",
-                      style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 35,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
