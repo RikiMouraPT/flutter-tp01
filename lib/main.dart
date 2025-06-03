@@ -45,6 +45,11 @@ class _MyHomePageState extends State<MyHomePage> {
   String decResutl = "0";
   String hexResult = "0";
 
+  int binButtonKey = 0;
+  int octButtonKey = 0;
+  int decButtonKey = 0;
+  int hexButtonKey = 0;
+
   @override
   void initState() {
     super.initState();
@@ -193,18 +198,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.history,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.history, size: 64, color: Colors.grey[400]),
             SizedBox(height: 16),
             Text(
               'No data available',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -231,10 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
               "${row[DatabaseHelper.columnOperator]} "
               "${row[DatabaseHelper.columnSecondOperand]} = "
               "${row[DatabaseHelper.columnResult]}",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             trailing: IconButton(
               icon: Icon(Icons.delete, color: Colors.red[400]),
@@ -254,6 +249,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final titleStyle = TextStyle(
+      fontSize: 25,
+      color: Theme.of(context).colorScheme.primary,
+      fontWeight: FontWeight.bold,
+    );
+
+    final resultStyle = TextStyle(fontSize: 25, color: Colors.green[900]);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -271,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     content: SizedBox(
                       width: double.maxFinite,
                       height: 300,
-                      child: buildListView()
+                      child: buildListView(),
                     ),
                   );
                 },
@@ -289,61 +292,117 @@ class _MyHomePageState extends State<MyHomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  onPressed: () => fromButton("Bin"),
-                  style: TextButton.styleFrom(
-                    backgroundColor:
-                        fromBase == 2
-                            ? Colors.lightGreen[100]
-                            : Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    return RotationTransition(
+                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      child: child,
+                    );
+                  },
+                  child: TextButton(
+                    key: ValueKey<int>(binButtonKey),
+                    onPressed: () {
+                      setState(() {
+                        binButtonKey++; // Força sempre uma nova animação
+                        fromButton("Bin");
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: fromBase == 2
+                          ? Colors.lightGreen[100]
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Text("Bin", style: TextStyle(fontSize: 25)),
                   ),
-                  child: Text("Bin", style: TextStyle(fontSize: 25)),
                 ),
-                TextButton(
-                  onPressed: () => fromButton("Oct"),
-                  style: TextButton.styleFrom(
-                    backgroundColor:
-                        fromBase == 8
-                            ? Colors.lightGreen[100]
-                            : Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    return RotationTransition(
+                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      child: child,
+                    );
+                  },
+                  child: TextButton(
+                    key: ValueKey<int>(octButtonKey),
+                    onPressed: () {
+                      setState(() {
+                        octButtonKey++;
+                        fromButton("Oct");
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: fromBase == 8
+                          ? Colors.lightGreen[100]
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Text("Oct", style: TextStyle(fontSize: 25)),
                   ),
-                  child: Text("Oct", style: TextStyle(fontSize: 25)),
                 ),
-                TextButton(
-                  onPressed: () => fromButton("Dec"),
-                  style: TextButton.styleFrom(
-                    backgroundColor:
-                        fromBase == 10
-                            ? Colors.lightGreen[100]
-                            : Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    return RotationTransition(
+                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      child: child,
+                    );
+                  },
+                  child: TextButton(
+                    key: ValueKey<int>(decButtonKey),
+                    onPressed: () {
+                      setState(() {
+                        decButtonKey++;
+                        fromButton("Dec");
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: fromBase == 10
+                          ? Colors.lightGreen[100]
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Text("Dec", style: TextStyle(fontSize: 25)),
                   ),
-                  child: Text("Dec", style: TextStyle(fontSize: 25)),
                 ),
-                TextButton(
-                  onPressed: () => fromButton("Hex"),
-                  style: TextButton.styleFrom(
-                    backgroundColor:
-                        fromBase == 16
-                            ? Colors.lightGreen[100]
-                            : Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    return RotationTransition(
+                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      child: child,
+                    );
+                  },
+                  child: TextButton(
+                    key: ValueKey<int>(hexButtonKey),
+                    onPressed: () {
+                      setState(() {
+                        hexButtonKey++;
+                        fromButton("Hex");
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: fromBase == 16
+                          ? Colors.lightGreen[100]
+                          : Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Text("Hex", style: TextStyle(fontSize: 25)),
                   ),
-                  child: Text("Hex", style: TextStyle(fontSize: 25)),
                 ),
               ],
             ),
@@ -406,89 +465,84 @@ class _MyHomePageState extends State<MyHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        "Bin",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text("Bin", style: titleStyle),
                       SizedBox(width: 10),
-                      Text(
-                        binResult,
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Colors.green[900],
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          );
+                        },
+                        child: Text(
+                          binResult,
+                          key: ValueKey(binResult),
+                          style: resultStyle,
                         ),
                       ),
                     ],
                   ),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        "Oct",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text("Oct", style: titleStyle),
                       SizedBox(width: 10),
-                      Text(
-                        octResult,
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Colors.green[900],
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          );
+                        },
+                        child: Text(
+                          octResult,
+                          key: ValueKey(octResult),
+                          style: resultStyle,
                         ),
                       ),
                     ],
                   ),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        "Dec",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text("Dec", style: titleStyle),
                       SizedBox(width: 10),
-                      Text(
-                        decResutl,
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Colors.green[900],
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          );
+                        },
+                        child: Text(
+                          decResutl,
+                          key: ValueKey(decResutl),
+                          style: resultStyle,
                         ),
                       ),
                     ],
                   ),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        "Hex",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text("Hex", style: titleStyle),
                       SizedBox(width: 10),
-                      Text(
-                        hexResult,
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Colors.green[900],
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          );
+                        },
+                        child: Text(
+                          hexResult,
+                          key: ValueKey(hexResult),
+                          style: resultStyle,
                         ),
                       ),
                     ],
