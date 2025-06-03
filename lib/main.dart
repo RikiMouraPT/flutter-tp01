@@ -186,6 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  /// Builds the ListView to display the history of operations.
   Widget buildListView() {
     if (rows.isEmpty) {
       return Center(
@@ -214,7 +215,6 @@ class _MyHomePageState extends State<MyHomePage> {
       itemBuilder: (context, index) {
         final row = rows[index];
         return Card(
-          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.lightGreen[100],
@@ -232,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
               "${row[DatabaseHelper.columnSecondOperand]} = "
               "${row[DatabaseHelper.columnResult]}",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -240,12 +240,9 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.delete, color: Colors.red[400]),
               onPressed: () async {
                 await dbHelper.delete(row[DatabaseHelper.columnId]);
-                queryHistory();
+                Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Registro eliminado"),
-                    duration: Duration(seconds: 1),
-                  ),
+                  SnackBar(content: Text("History entry deleted")),
                 );
               },
             ),
