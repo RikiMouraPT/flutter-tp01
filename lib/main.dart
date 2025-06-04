@@ -269,13 +269,35 @@ class _MyHomePageState extends State<MyHomePage> {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return AlertDialog(
-                    title: Text("History"),
-                    content: SizedBox(
-                      width: double.maxFinite,
-                      height: 300,
-                      child: buildListView(),
-                    ),
+                  return TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 800),
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    curve: Curves.easeInOut,
+                    builder: (context, value, child) {
+                      return Transform.rotate(
+                        angle: value * 2 * 3.14159, // 360 graus = 2π radianos
+                        child: AlertDialog(
+                          title: Text("History"),
+                          content: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) {
+                              return RotationTransition(
+                                turns: Tween(
+                                  begin: 0.0,
+                                  end: 1.0,
+                                ).animate(animation),
+                                child: child,
+                              );
+                            },
+                            child: SizedBox(
+                              width: double.maxFinite,
+                              height: 300,
+                              child: buildListView(),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               );
@@ -296,7 +318,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: Duration(milliseconds: 500),
                   transitionBuilder: (child, animation) {
                     return RotationTransition(
-                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      turns: Tween<double>(
+                        begin: 0.0,
+                        end: 1.0,
+                      ).animate(animation),
                       child: child,
                     );
                   },
@@ -309,13 +334,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                     style: TextButton.styleFrom(
-                      backgroundColor: fromBase == 2
-                          ? Colors.lightGreen[100]
-                          : Colors.transparent,
+                      backgroundColor:
+                          fromBase == 2
+                              ? Colors.lightGreen[100]
+                              : Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                     ),
                     child: Text("Bin", style: TextStyle(fontSize: 25)),
                   ),
@@ -324,7 +353,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: Duration(milliseconds: 500),
                   transitionBuilder: (child, animation) {
                     return RotationTransition(
-                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      turns: Tween<double>(
+                        begin: 0.0,
+                        end: 1.0,
+                      ).animate(animation),
                       child: child,
                     );
                   },
@@ -337,13 +369,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                     style: TextButton.styleFrom(
-                      backgroundColor: fromBase == 8
-                          ? Colors.lightGreen[100]
-                          : Colors.transparent,
+                      backgroundColor:
+                          fromBase == 8
+                              ? Colors.lightGreen[100]
+                              : Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                     ),
                     child: Text("Oct", style: TextStyle(fontSize: 25)),
                   ),
@@ -352,7 +388,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: Duration(milliseconds: 500),
                   transitionBuilder: (child, animation) {
                     return RotationTransition(
-                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      turns: Tween<double>(
+                        begin: 0.0,
+                        end: 1.0,
+                      ).animate(animation),
                       child: child,
                     );
                   },
@@ -365,13 +404,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                     style: TextButton.styleFrom(
-                      backgroundColor: fromBase == 10
-                          ? Colors.lightGreen[100]
-                          : Colors.transparent,
+                      backgroundColor:
+                          fromBase == 10
+                              ? Colors.lightGreen[100]
+                              : Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                     ),
                     child: Text("Dec", style: TextStyle(fontSize: 25)),
                   ),
@@ -380,7 +423,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: Duration(milliseconds: 500),
                   transitionBuilder: (child, animation) {
                     return RotationTransition(
-                      turns: Tween<double>(begin: 0.0, end: 1.0).animate(animation),
+                      turns: Tween<double>(
+                        begin: 0.0,
+                        end: 1.0,
+                      ).animate(animation),
                       child: child,
                     );
                   },
@@ -393,13 +439,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                     style: TextButton.styleFrom(
-                      backgroundColor: fromBase == 16
-                          ? Colors.lightGreen[100]
-                          : Colors.transparent,
+                      backgroundColor:
+                          fromBase == 16
+                              ? Colors.lightGreen[100]
+                              : Colors.transparent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                     ),
                     child: Text("Hex", style: TextStyle(fontSize: 25)),
                   ),
